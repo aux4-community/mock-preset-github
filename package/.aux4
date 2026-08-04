@@ -1,7 +1,7 @@
 {
   "scope": "community",
   "name": "mock-preset-github",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "GitHub service preset for aux4/mock (bearer-gated GET /user + Requires authentication 401)",
   "license": "Apache-2.0",
   "tags": [
