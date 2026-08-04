@@ -1,0 +1,101 @@
+{
+  "scope": "community",
+  "name": "mock-preset-github",
+  "version": "0.0.1",
+  "description": "GitHub service preset for aux4/mock (bearer-gated GET /user + Requires authentication 401)",
+  "license": "Apache-2.0",
+  "tags": [
+    "aux4",
+    "mock",
+    "preset",
+    "github",
+    "test"
+  ],
+  "dependencies": [
+    "aux4/mock"
+  ],
+  "profiles": [
+    {
+      "name": "main",
+      "commands": [
+        {
+          "name": "mock",
+          "execute": [
+            "profile:mock"
+          ],
+          "help": {
+            "text": "Programmable HTTP mock server for tests"
+          }
+        }
+      ]
+    },
+    {
+      "name": "mock",
+      "commands": [
+        {
+          "name": "preset",
+          "execute": [
+            "profile:mock:preset"
+          ],
+          "help": {
+            "text": "Apply a service preset to a running mock. Presets are installable packages (community/mock-preset-<service>) that add commands here."
+          }
+        }
+      ]
+    },
+    {
+      "name": "mock:preset",
+      "commands": [
+        {
+          "name": "github",
+          "execute": [
+            "set:login=!printf %s \"${user}\" | tr '[:upper:]' '[:lower:]' | tr -d '[:space:]'",
+            "set:identityBody={\"avatar_url\":\"https://avatars.githubusercontent.com/u/${id}?v=4\",\"bio\":null,\"blog\":\"\",\"company\":null,\"created_at\":\"2020-01-01T00:00:00Z\",\"email\":\"${email}\",\"followers\":5,\"following\":3,\"html_url\":\"https://github.com/${login}\",\"id\":${id},\"location\":null,\"login\":\"${login}\",\"name\":\"${user}\",\"node_id\":\"MDQ6VXNlcjEyMzQ1Njc=\",\"public_gists\":2,\"public_repos\":10,\"site_admin\":false,\"type\":\"User\",\"updated_at\":\"2024-01-01T00:00:00Z\"}",
+            "aux4 mock stub param(port) param(name) param(stateDir) --method GET --path /user --status 200 --when-header 'authorization=Bearer *' --body value(identityBody)",
+            "aux4 mock stub param(port) param(name) param(stateDir) --method GET --path /user --status 401 --body value(unauthBody)"
+          ],
+          "help": {
+            "text": "Register GitHub's authenticated-user check on a running mock: bearer-gated GET /user returning a realistic GitHub user, plus the real 'Requires authentication' 401 envelope",
+            "variables": [
+              {
+                "name": "port",
+                "text": "Port of the running mock server (derives stateDir)",
+                "default": "7070"
+              },
+              {
+                "name": "name",
+                "text": "Stable handle of the server (derives stateDir; takes precedence over --port)",
+                "default": ""
+              },
+              {
+                "name": "stateDir",
+                "text": "Explicit state directory (highest precedence)",
+                "default": ""
+              },
+              {
+                "name": "user",
+                "text": "Display name returned as 'name' in GET /user (login is derived from it: lowercased, spaces removed)",
+                "default": "Sally"
+              },
+              {
+                "name": "email",
+                "text": "Email returned in GET /user",
+                "default": "sally@example.com"
+              },
+              {
+                "name": "id",
+                "text": "Numeric user id returned in GET /user",
+                "default": "1234567"
+              },
+              {
+                "name": "unauthBody",
+                "text": "GitHub 'Requires authentication' 401 error envelope",
+                "default": "{\"message\":\"Requires authentication\",\"documentation_url\":\"https://docs.github.com/rest\"}"
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}
